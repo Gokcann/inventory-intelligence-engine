@@ -1,0 +1,102 @@
+openapi: 3.0.3
+info:
+  title: Inventory API
+  description: Stock management endpoints for IIE
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+
+tags:
+  - name: inventory
+    description: Stock operations
+
+paths:
+  /inventory/{sku}:
+    get:
+      tags:
+        - inventory
+      operationId: getStock
+      summary: Get current stock level
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Stock level retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockResponse'
+        '404':
+          description: SKU not found
+
+  /inventory/{sku}/reserve:
+    post:
+      tags:
+        - inventory
+      operationId: reserveStock
+      summary: Reserve stock for an order
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReserveRequest'
+      responses:
+        '200':
+          description: Stock reserved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReserveResponse'
+        '409':
+          description: Insufficient stock
+
+components:
+  schemas:
+    StockResponse:
+      type: object
+      properties:
+        sku:
+          type: string
+        available:
+          type: integer
+        reserved:
+          type: integer
+      required:
+        - sku
+        - available
+
+    ReserveRequest:
+      type: object
+      properties:
+        orderId:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+      required:
+        - orderId
+        - quantity
+
+    ReserveResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        remainingStock:
+          type: integer
+        message:
+          type: string
+      required:
+        - success
