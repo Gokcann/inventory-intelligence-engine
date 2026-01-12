@@ -8,20 +8,24 @@ import java.util.Optional;
 @Service
 class InventoryService implements InventoryManagement {
 
+    private final StockRedisService redisService;
+
+    InventoryService(StockRedisService redisService) {
+        this.redisService = redisService;
+    }
+
     @Override
     public boolean reserveStock(String sku, int quantity, String orderId) {
-        // TODO: Redis Lua script implementation
-        return false;
+        return redisService.reserveStock(sku, quantity);
     }
 
     @Override
     public void releaseStock(String sku, int quantity, String orderId) {
-        // TODO: Redis Lua script implementation
+        redisService.setStock(sku, redisService.getStock(sku).orElse(0) + quantity);
     }
 
     @Override
     public Optional<Integer> getAvailableStock(String sku) {
-        // TODO: Redis lookup
-        return Optional.empty();
+        return redisService.getStock(sku);
     }
 }

@@ -1,0 +1,92 @@
+openapi: 3.0.3
+info:
+  title: Order API
+  description: Order management endpoints for IIE
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+
+tags:
+  - name: orders
+    description: Order operations
+
+paths:
+  /orders:
+    post:
+      tags:
+        - orders
+      operationId: createOrder
+      summary: Create a new order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '409':
+          description: Insufficient stock
+
+  /orders/{orderId}:
+    get:
+      tags:
+        - orders
+      operationId: getOrder
+      summary: Get order by ID
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: Order not found
+
+components:
+  schemas:
+    CreateOrderRequest:
+      type: object
+      properties:
+        sku:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+      required:
+        - sku
+        - quantity
+
+    OrderResponse:
+      type: object
+      properties:
+        orderId:
+          type: string
+        sku:
+          type: string
+        quantity:
+          type: integer
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, CANCELLED]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - orderId
+        - sku
+        - quantity
+        - status

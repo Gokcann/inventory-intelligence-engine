@@ -173,6 +173,25 @@
 							</configOptions>
 						</configuration>
 					</execution>
+					<execution>
+						<id>generate-order-api</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<inputSpec>${project.basedir}/src/main/resources/api/order-api.yaml</inputSpec>
+							<generatorName>spring</generatorName>
+							<apiPackage>com.iie.core.order.api</apiPackage>
+							<modelPackage>com.iie.core.order.api.model</modelPackage>
+							<configOptions>
+								<interfaceOnly>true</interfaceOnly>
+								<useSpringBoot3>true</useSpringBoot3>
+								<skipDefaultInterface>true</skipDefaultInterface>
+								<useTags>true</useTags>
+								<openApiNullable>false</openApiNullable>
+							</configOptions>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
