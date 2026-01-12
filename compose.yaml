@@ -1,0 +1,81 @@
+# Inventory Intelligence Engine - Docker Compose Configuration
+# PostgreSQL 17, Redis 7 Alpine, Kafka KRaft (Zookeeper-less)
+
+services:
+  # ============================================
+  # PostgreSQL 17 - Primary Database
+  # ============================================
+  postgres:
+    image: postgres:17-alpine
+    container_name: iie-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: iie
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - iie-network
+
+  # ============================================
+  # Redis 7 - Cache and Atomic Operations (Lua)
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: iie-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - iie-network
+
+  # ============================================
+  # Kafka KRaft Mode (Zookeeper-less)
+  # ============================================
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: iie-kafka
+    ports:
+      - "9093:9093"
+      - "9094:9094"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093,CONTROLLER://0.0.0.0:9095,EXTERNAL://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9093,EXTERNAL://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9095
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      CLUSTER_ID: iie-cluster-001
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9093 --list || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - iie-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  iie-network:
+    driver: bridge
