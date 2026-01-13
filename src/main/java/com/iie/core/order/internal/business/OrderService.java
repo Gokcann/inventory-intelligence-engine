@@ -1,7 +1,7 @@
 package com.iie.core.order.internal.business;
 
 import com.iie.core.inventory.InventoryManagement;
-import com.iie.core.order.OrderEvents.OrderCreated;
+import com.iie.core.shared.events.OrderCreated;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 

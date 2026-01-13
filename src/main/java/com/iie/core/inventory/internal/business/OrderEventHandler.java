@@ -1,6 +1,6 @@
 package com.iie.core.inventory.internal.business;
 
-import com.iie.core.order.OrderEvents.OrderCreated;
+import com.iie.core.shared.events.OrderCreated;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
